@@ -173,7 +173,7 @@ export default function MenuPage() {
       id: "karisik-pide",
       name: "Karışık Pide",
       description: "Kıyma, kuşbaşı ve kaşar karışımı pide",
-      price: 300,
+      price: 325,
       image: "/images/karisik-pide-new.png",
       category: "pideler",
       preparationTime: "15-20 dk",
