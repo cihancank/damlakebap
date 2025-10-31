@@ -68,7 +68,7 @@ export default function MenuPage() {
       id: "tavuk-sis",
       name: "Tavuk Şiş",
       description: "Marine edilmiş tavuk şiş kebabı",
-      price: 370,
+      price: 375,
       image: "/images/tavuk-sis-new.png",
       category: "kebaplar",
       preparationTime: "18-22 dk",
