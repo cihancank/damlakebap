@@ -73,6 +73,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
   const [form, setForm] = useState<Omit<MenuItem, "id">>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -123,6 +124,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
     setShowForm(false)
     setEditingItem(null)
     setSaved(false)
+    setSaveError(null)
   }
 
   async function handleImageUpload(file: File) {
@@ -140,30 +142,58 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
 
   async function handleSave() {
     setSaving(true)
+    setSaveError(null)
     const supabase = createClient()
 
-    // Auto-generate slug from name if empty
-    const slug = form.slug || form.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+    // Generate base slug from name if user left it empty
+    const baseSlug = form.slug ||
+      form.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
 
     if (editingItem) {
       const { data, error } = await supabase
         .from("menu_items")
-        .update({ ...form, slug, updated_at: new Date().toISOString() })
+        .update({ ...form, slug: baseSlug, updated_at: new Date().toISOString() })
         .eq("id", editingItem.id)
         .select()
         .single()
-      if (!error && data) {
-        setItems((prev) => prev.map((i) => (i.id === editingItem.id ? data : i)))
+      if (error) {
+        setSaveError(error.message)
+        setSaving(false)
+        return
       }
+      if (data) setItems((prev) => prev.map((i) => (i.id === editingItem.id ? data : i)))
     } else {
-      const { data, error } = await supabase
+      // For new items: if slug conflicts (409), append a short unique suffix and retry once
+      let slug = baseSlug
+      let { data, error } = await supabase
         .from("menu_items")
         .insert({ ...form, slug })
         .select()
         .single()
-      if (!error && data) {
-        setItems((prev) => [...prev, data])
+
+      if (error && (error.code === "23505" || error.message?.includes("duplicate") || error.message?.includes("unique"))) {
+        // Slug collision — append a 4-char random suffix and retry
+        slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
+        const retry = await supabase
+          .from("menu_items")
+          .insert({ ...form, slug })
+          .select()
+          .single()
+        data = retry.data
+        error = retry.error
       }
+
+      if (error) {
+        setSaveError(error.message)
+        setSaving(false)
+        return
+      }
+      if (data) setItems((prev) => [...prev, data])
     }
 
     setSaving(false)
@@ -528,11 +558,16 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
             </div>
 
             {/* Modal footer */}
-            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
               {saved && (
                 <span className="flex items-center gap-1.5 text-sm text-emerald-400">
                   <CheckCircle className="h-4 w-4" />
                   Kaydedildi
+                </span>
+              )}
+              {saveError && (
+                <span className="mr-auto text-xs text-red-400">
+                  Hata: {saveError}
                 </span>
               )}
               <Button
