@@ -150,11 +150,11 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
         </div>
       )}
 
-      {/* Add Modal */}
+      {/* Add Modal — bottom sheet on mobile */}
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:px-4">
+          <div className="w-full max-w-md overflow-hidden rounded-t-2xl border border-zinc-800 bg-zinc-900 shadow-2xl sm:rounded-2xl flex flex-col max-h-[90vh]">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
               <h2 className="font-semibold text-white">Fotoğraf Ekle</h2>
               <button
                 onClick={() => setShowAdd(false)}
@@ -164,7 +164,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 sm:px-6 sm:py-5">
               {/* Preview */}
               {newUrl && (
                 <div className="overflow-hidden rounded-xl bg-zinc-800">
@@ -240,7 +240,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-zinc-800 px-6 py-4">
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
               {added && (
                 <span className="flex items-center gap-1.5 text-sm text-emerald-400">
                   <CheckCircle className="h-4 w-4" />
@@ -302,43 +302,49 @@ function GalleryCard({
           src={image.src}
           alt={image.alt ?? "Galeri"}
           fill
-          className="object-cover transition-transform group-hover:scale-105"
+          className="object-cover"
           unoptimized={image.src.startsWith("http")}
         />
-        {/* Overlay actions */}
-        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-          <button
-            onClick={() => onToggleActive(image)}
-            title={image.is_active ? "Gizle" : "Goster"}
-            className="rounded-lg bg-zinc-900/80 p-2 text-white hover:bg-zinc-800 transition-colors"
-          >
-            {image.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 text-zinc-500" />}
-          </button>
-          {deleteConfirm === image.id ? (
-            <div className="flex items-center gap-1 rounded-lg bg-zinc-900/90 px-3 py-1.5">
-              <span className="text-xs text-zinc-300">Emin misiniz?</span>
-              <button
-                onClick={() => onDelete(image.id)}
-                className="ml-1 text-xs text-red-400 hover:text-red-300"
-              >
-                Evet
-              </button>
-              <button
-                onClick={() => onSetDeleteConfirm(null)}
-                className="text-xs text-zinc-500 hover:text-white"
-              >
-                Hayir
-              </button>
-            </div>
-          ) : (
+      </div>
+
+      {/* Actions row — always visible (works on touch) */}
+      <div className="flex items-center gap-2 px-3 pt-2">
+        <button
+          onClick={() => onToggleActive(image)}
+          title={image.is_active ? "Gizle" : "Goster"}
+          className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors ${
+            image.is_active
+              ? "bg-emerald-900/30 text-emerald-400"
+              : "bg-zinc-800 text-zinc-500"
+          }`}
+        >
+          {image.is_active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+          {image.is_active ? "Aktif" : "Gizli"}
+        </button>
+        <div className="flex-1" />
+        {deleteConfirm === image.id ? (
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => onSetDeleteConfirm(image.id)}
-              className="rounded-lg bg-zinc-900/80 p-2 text-white hover:bg-red-950/80 hover:text-red-400 transition-colors"
+              onClick={() => onDelete(image.id)}
+              className="rounded-md px-2 py-1 text-xs text-red-400 hover:bg-red-950/30"
             >
-              <Trash2 className="h-4 w-4" />
+              Sil
             </button>
-          )}
-        </div>
+            <button
+              onClick={() => onSetDeleteConfirm(null)}
+              className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:text-white"
+            >
+              Iptal
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => onSetDeleteConfirm(image.id)}
+            className="rounded-md p-1.5 text-zinc-500 hover:bg-red-950/30 hover:text-red-400 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Label / Alt editor */}

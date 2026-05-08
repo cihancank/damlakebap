@@ -5,6 +5,7 @@ import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import CallWidget from "@/components/call-widget"
+import { headers } from "next/headers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -40,11 +41,15 @@ export const metadata = {
     generator: 'v0.app'
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headersList = await headers()
+  const pathname = headersList.get("x-pathname") ?? ""
+  const isAdmin = pathname.startsWith("/admin")
+
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
@@ -55,12 +60,17 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <Header />
-          <main className="min-h-screen pt-20">{children}</main>
-          <Footer />
-        </ThemeProvider>
-        <CallWidget />
+        {isAdmin ? (
+          // Admin pages: no header, footer or call widget
+          children
+        ) : (
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+            <Header />
+            <main className="min-h-screen pt-20">{children}</main>
+            <Footer />
+          </ThemeProvider>
+        )}
+        {!isAdmin && <CallWidget />}
       </body>
     </html>
   )

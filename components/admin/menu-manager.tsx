@@ -195,9 +195,9 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
   return (
     <div className="space-y-6">
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 gap-2">
-          <div className="relative flex-1 max-w-xs">
+      <div className="space-y-2 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
             <Input
               placeholder="Ürün ara..."
@@ -206,6 +206,29 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
               className="border-zinc-700 bg-zinc-800 pl-9 text-sm text-white placeholder:text-zinc-500 focus:border-primary"
             />
           </div>
+          <div className="relative flex-shrink-0">
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="h-9 appearance-none rounded-md border border-zinc-700 bg-zinc-800 pl-3 pr-8 text-sm text-white focus:border-primary focus:outline-none"
+            >
+              <option value="all">Tümü</option>
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+          </div>
+        </div>
+        <Button
+          onClick={openNew}
+          className="w-full bg-primary text-white hover:bg-primary/90 sm:w-auto"
+          size="sm"
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          Yeni Ürün
+        </Button>
+      </div>
           <div className="relative">
             <select
               value={filterCategory}
@@ -345,12 +368,12 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
         ))
       )}
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit Modal — bottom sheet on mobile, centered on desktop */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8">
-          <div className="w-full max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:px-4 sm:py-8">
+          <div className="w-full max-w-2xl overflow-hidden rounded-t-2xl border border-zinc-800 bg-zinc-900 shadow-2xl sm:rounded-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col">
             {/* Modal header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
               <h2 className="font-semibold text-white">
                 {editingItem ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}
               </h2>
@@ -362,8 +385,8 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
               </button>
             </div>
 
-            {/* Modal body */}
-            <div className="px-6 py-5 space-y-4">
+            {/* Modal body — scrollable */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 sm:px-6 sm:py-5">
               {/* Image */}
               <div>
                 <label className="mb-2 block text-xs font-medium text-zinc-400">Ürün Görseli</label>
@@ -418,7 +441,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
               </div>
 
               {/* Name + Category */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-zinc-400">Ürün Adı *</label>
                   <Input
@@ -458,7 +481,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
               </div>
 
               {/* Price + Prep time + Sort */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
                 <div>
                   <label className="mb-1.5 block text-xs font-medium text-zinc-400">Fiyat (₺) *</label>
                   <Input
@@ -528,7 +551,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
             </div>
 
             {/* Modal footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-zinc-800 px-6 py-4">
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
               {saved && (
                 <span className="flex items-center gap-1.5 text-sm text-emerald-400">
                   <CheckCircle className="h-4 w-4" />
