@@ -5,53 +5,39 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Ayşe Y.",
-    text: "Ataşehir'deki favori kebapçım! Adana kebapları her zaman enfes, servis ise harika. 16 yıllık deneyimleri gerçekten belli oluyor.",
-    rating: 5,
-    location: "Ataşehir",
-  },
-  {
-    id: 2,
-    name: "Mehmet D.",
-    text: "Urfa kebaplarını mutlaka denemelisiniz. Yanında gelen mezeler de çok lezzetli. Ailecek severek gidiyoruz.",
-    rating: 5,
-    location: "Küçükbakkalköy",
-  },
-  {
-    id: 3,
-    name: "Zeynep K.",
-    text: "İskender kebabı için sürekli geliyorum. Porsiyonlar doyurucu, fiyatlar makul. İki telefon hattı olması çok pratik.",
-    rating: 4,
-    location: "Ataşehir",
-  },
-  {
-    id: 4,
-    name: "Ali R.",
-    text: "Ataşehir'de iş toplantıları için sık sık tercih ettiğimiz bir mekan. Hızlı servis ve kaliteli yemekler sunuyorlar.",
-    rating: 5,
-    location: "Ataşehir",
-  },
-  {
-    id: 5,
-    name: "Fatma S.",
-    text: "Baraj Yolu'nda çok uygun bir konumda. Paket servisleri de çok hızlı, 20 dakikada geldi siparişim.",
-    rating: 5,
-    location: "Yenişehir",
-  },
-  {
-    id: 6,
-    name: "Osman T.",
-    text: "16 yıldır bu kaliteyi koruyabilmeleri gerçekten takdire şayan. Çöp şiş dürümleri harika!",
-    rating: 5,
-    location: "Ataşehir",
-  },
-]
+type S = Record<string, string>
 
-export default function Testimonials() {
+const DEFAULTS = {
+  title: "Müşterilerimiz Damla Kebap Hakkında Ne Diyor?",
+  subtitle: "16 yıllık deneyimimizin müşteri memnuniyetine yansıması",
+  stat1_value: "4.8", stat1_label: "Ortalama Puan",
+  stat2_value: "1000+", stat2_label: "Mutlu Müşteri",
+  stat3_value: "16", stat3_label: "Yıllık Deneyim",
+  review_url: "https://g.page/damla-kebap-atasehir/review",
+  reviews: [
+    { name: "Ayşe Y.", location: "Ataşehir", rating: 5, text: "Ataşehir'deki favori kebapçım! Adana kebapları her zaman enfes, servis ise harika. 16 yıllık deneyimleri gerçekten belli oluyor." },
+    { name: "Mehmet D.", location: "Küçükbakkalköy", rating: 5, text: "Urfa kebaplarını mutlaka denemelisiniz. Yanında gelen mezeler de çok lezzetli. Ailecek severek gidiyoruz." },
+    { name: "Zeynep K.", location: "Ataşehir", rating: 4, text: "İskender kebabı için sürekli geliyorum. Porsiyonlar doyurucu, fiyatlar makul. İki telefon hattı olması çok pratik." },
+    { name: "Ali R.", location: "Ataşehir", rating: 5, text: "Ataşehir'de iş toplantıları için sık sık tercih ettiğimiz bir mekan. Hızlı servis ve kaliteli yemekler sunuyorlar." },
+    { name: "Fatma S.", location: "Yenişehir", rating: 5, text: "Baraj Yolu'nda çok uygun bir konumda. Paket servisleri de çok hızlı, 20 dakikada geldi siparişim." },
+    { name: "Osman T.", location: "Ataşehir", rating: 5, text: "16 yıldır bu kaliteyi koruyabilmeleri gerçekten takdire şayan. Çöp şiş dürümleri harika!" },
+  ],
+}
+
+export default function Testimonials({ s = {} }: { s?: S }) {
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  // Build reviews from settings, falling back to defaults
+  const testimonials = DEFAULTS.reviews.map((def, i) => {
+    const n = i + 1
+    return {
+      id: n,
+      name: s[`testimonials_r${n}_name`] || def.name,
+      location: s[`testimonials_r${n}_location`] || def.location,
+      text: s[`testimonials_r${n}_text`] || def.text,
+      rating: def.rating,
+    }
+  }).filter((r) => r.text)
   const itemsPerPage = 2
   const totalPages = Math.ceil(testimonials.length / itemsPerPage)
 
@@ -70,9 +56,9 @@ export default function Testimonials() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center">
           <h2 className="mb-2 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Müşterilerimiz Damla Kebap Hakkında Ne Diyor?
+            {s.testimonials_title || DEFAULTS.title}
           </h2>
-          <p className="text-lg text-gray-300">16 yıllık deneyimimizin müşteri memnuniyetine yansıması</p>
+          <p className="text-lg text-gray-300">{s.testimonials_subtitle || DEFAULTS.subtitle}</p>
         </div>
 
         <div className="relative">
@@ -138,20 +124,20 @@ export default function Testimonials() {
         <div className="mt-8 text-center">
           <div className="mb-4 flex items-center justify-center gap-8 text-white">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">4.8</div>
-              <div className="text-sm text-gray-400">Ortalama Puan</div>
+              <div className="text-2xl font-bold text-primary">{s.testimonials_stat1_value || DEFAULTS.stat1_value}</div>
+              <div className="text-sm text-gray-400">{s.testimonials_stat1_label || DEFAULTS.stat1_label}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">1000+</div>
-              <div className="text-sm text-gray-400">Mutlu Müşteri</div>
+              <div className="text-2xl font-bold text-primary">{s.testimonials_stat2_value || DEFAULTS.stat2_value}</div>
+              <div className="text-sm text-gray-400">{s.testimonials_stat2_label || DEFAULTS.stat2_label}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">16</div>
-              <div className="text-sm text-gray-400">Yıllık Deneyim</div>
+              <div className="text-2xl font-bold text-primary">{s.testimonials_stat3_value || DEFAULTS.stat3_value}</div>
+              <div className="text-sm text-gray-400">{s.testimonials_stat3_label || DEFAULTS.stat3_label}</div>
             </div>
           </div>
           <Button variant="link" className="text-primary hover:text-primary/80" asChild>
-            <a href="https://g.page/damla-kebap-atasehir/review" target="_blank" rel="noopener noreferrer">
+            <a href={s.testimonials_review_url || DEFAULTS.review_url} target="_blank" rel="noopener noreferrer">
               Tüm Yorumları Okuyun
             </a>
           </Button>

@@ -3,18 +3,40 @@ import Image from "next/image"
 import { ChevronRight, MapPin, Phone, Clock, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Suspense, lazy } from "react"
+import { createClient } from "@/lib/supabase/server"
 
 // Lazy load components that are below the fold
 const WhyChooseUs = lazy(() => import("@/components/why-choose-us"))
 const Testimonials = lazy(() => import("@/components/testimonials"))
 const ContactSection = lazy(() => import("@/components/contact-section"))
+const GallerySection = lazy(() => import("@/components/gallery-section"))
 
 // Loading component for lazy loaded sections
 function SectionSkeleton() {
   return <div className="animate-pulse bg-gray-200 h-64 w-full rounded-lg"></div>
 }
 
-export default function Home() {
+export const revalidate = 60
+
+export default async function Home() {
+  // Fetch CMS data
+  const supabase = await createClient()
+
+  const [{ data: settingsRows }, { data: galleryRows }] = await Promise.all([
+    supabase.from("site_settings").select("key, value"),
+    supabase.from("gallery_images").select("src, alt, label").eq("is_active", true).order("sort_order"),
+  ])
+
+  // Build settings map
+  const s: Record<string, string> = {}
+  settingsRows?.forEach(({ key, value }) => { s[key] = value ?? "" })
+
+  // Gallery items for the slider
+  const galleryItems = (galleryRows ?? []).map((img) => ({
+    src: img.src,
+    alt: img.alt ?? img.label ?? "Galeri",
+    label: img.label ?? "",
+  }))
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -56,37 +78,37 @@ export default function Home() {
           <div className="mb-3 flex items-center justify-center gap-2 md:mb-4">
             <div className="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-1 text-xs text-primary md:px-3 md:text-sm backdrop-blur-sm border border-primary/30">
               <Star className="h-3 w-3 fill-current md:h-4 md:w-4" />
-              <span className="font-medium">16 Yıllık Deneyim</span>
+              <span className="font-medium">{s.hero_badge_experience || "16 Yıllık Deneyim"}</span>
             </div>
             <div className="flex items-center gap-1 rounded-full bg-zinc-800/80 px-2 py-1 text-xs text-white md:px-3 md:text-sm backdrop-blur-sm border border-zinc-600">
               <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Ataşehir, İstanbul</span>
+              <span>{s.hero_badge_location || "Ataşehir, İstanbul"}</span>
             </div>
           </div>
 
           <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-white md:mb-4 md:text-4xl lg:text-5xl xl:text-6xl drop-shadow-2xl">
-            Damla Kebap: Ataşehir'in Kalbinde Eşsiz Lezzet Durağı
+            {s.hero_title || "Damla Kebap: Ataşehir'in Kalbinde Eşsiz Lezzet Durağı"}
           </h1>
           <p className="mb-4 text-sm text-white/90 md:mb-8 md:text-xl lg:text-2xl drop-shadow-lg">
-            16 Yıldır Geleneksel Türk Mutfağının En Seçkin Lezzetlerini Sunuyoruz
+            {s.hero_subtitle || "16 Yıldır Geleneksel Türk Mutfağının En Seçkin Lezzetlerini Sunuyoruz"}
           </p>
 
           {/* Quick Info Cards */}
           <div className="mb-4 grid grid-cols-3 gap-2 md:mb-8 md:gap-4">
             <div className="rounded-lg bg-black/50 p-2 backdrop-blur-sm border border-white/10 md:p-4">
               <Clock className="mx-auto mb-1 h-4 w-4 text-primary md:mb-2 md:h-6 md:w-6" />
-              <p className="text-xs text-white md:text-sm">Hızlı Teslimat</p>
-              <p className="text-xs text-gray-300">20-35 dk</p>
+              <p className="text-xs text-white md:text-sm">{s.hero_stat1_label || "Hızlı Teslimat"}</p>
+              <p className="text-xs text-gray-300">{s.hero_stat1_value || "20-35 dk"}</p>
             </div>
             <div className="rounded-lg bg-black/50 p-2 backdrop-blur-sm border border-white/10 md:p-4">
               <Star className="mx-auto mb-1 h-4 w-4 text-primary md:mb-2 md:h-6 md:w-6" />
-              <p className="text-xs text-white md:text-sm">Müşteri Memnuniyeti</p>
-              <p className="text-xs text-gray-300">4.8/5 puan</p>
+              <p className="text-xs text-white md:text-sm">{s.hero_stat2_label || "Müşteri Memnuniyeti"}</p>
+              <p className="text-xs text-gray-300">{s.hero_stat2_value || "4.8/5 puan"}</p>
             </div>
             <div className="rounded-lg bg-black/50 p-2 backdrop-blur-sm border border-white/10 md:p-4">
               <Phone className="mx-auto mb-1 h-4 w-4 text-primary md:mb-2 md:h-6 md:w-6" />
-              <p className="text-xs text-white md:text-sm">Sipariş hattı</p>
-              <p className="text-xs text-gray-300">2 Hat Aktif</p>
+              <p className="text-xs text-white md:text-sm">{s.hero_stat3_label || "Sipariş hattı"}</p>
+              <p className="text-xs text-gray-300">{s.hero_stat3_value || "2 Hat Aktif"}</p>
             </div>
           </div>
 
@@ -96,7 +118,7 @@ export default function Home() {
               size="sm"
               className="w-full bg-primary text-white hover:bg-primary/90 px-6 py-2 sm:w-auto md:size-lg md:px-8 md:py-3 shadow-2xl"
             >
-              <a href="tel:+902164563790">
+              <a href={`tel:${s.hero_phone1 || "+902164563790"}`}>
                 <span className="mr-2">📞</span>
                 Şimdi Sipariş Ver
               </a>
@@ -120,9 +142,9 @@ export default function Home() {
               size="sm"
               className="w-full border-primary/50 bg-black/30 text-white hover:bg-primary/20 backdrop-blur-sm sm:w-auto"
             >
-              <a href="tel:+902164563790">
+              <a href={`tel:${s.hero_phone1 || "+902164563790"}`}>
                 <Phone className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-                <span className="text-xs md:text-sm">216 456 37 90</span>
+                <span className="text-xs md:text-sm">{s.hero_phone1_display || "216 456 37 90"}</span>
               </a>
             </Button>
             <Button
@@ -131,18 +153,18 @@ export default function Home() {
               size="sm"
               className="w-full border-primary/50 bg-black/30 text-white hover:bg-primary/20 backdrop-blur-sm sm:w-auto"
             >
-              <a href="tel:+902164563791">
+              <a href={`tel:${s.hero_phone2 || "+902164563791"}`}>
                 <Phone className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-                <span className="text-xs md:text-sm">216 456 37 91</span>
+                <span className="text-xs md:text-sm">{s.hero_phone2_display || "216 456 37 91"}</span>
               </a>
             </Button>
           </div>
 
           <div>
             <Button asChild variant="ghost" size="sm" className="text-white/80 hover:text-white">
-              <a href="https://g.co/kgs/cQVWqD2" target="_blank" rel="noopener noreferrer">
+              <a href={s.hero_maps_url || "https://g.co/kgs/cQVWqD2"} target="_blank" rel="noopener noreferrer">
                 <MapPin className="mr-1 h-3 w-3 md:mr-2 md:h-4 md:w-4" />
-                <span className="text-xs md:text-sm">Yenişehir, Baraj Yolu Cad. 30/A - Yol Tarifi Al</span>
+                <span className="text-xs md:text-sm">{s.hero_address || "Yenişehir, Baraj Yolu Cad. 30/A - Yol Tarifi Al"}</span>
               </a>
             </Button>
           </div>
@@ -162,7 +184,7 @@ export default function Home() {
             <div className="md:col-span-2">
               <div className="group relative overflow-hidden rounded-xl shadow-lg">
                 <Image
-                  src="/images/restaurant-interior-new.jpg"
+                  src={s.showcase_interior_image || "/images/restaurant-interior-new.jpg"}
                   alt="Damla Kebap'ın modern ve şık iç mekanı"
                   width={800}
                   height={500}
@@ -183,7 +205,7 @@ export default function Home() {
             <div className="space-y-4">
               <div className="group relative overflow-hidden rounded-xl shadow-lg">
                 <Image
-                  src="/images/exterior-storefront.jpg"
+                  src={s.showcase_exterior_image || "/images/exterior-storefront.jpg"}
                   alt="Damla Kebap'ın gece görünümü ve dış cephesi"
                   width={400}
                   height={300}
@@ -282,7 +304,7 @@ export default function Home() {
 
           <div className="overflow-hidden rounded-lg shadow-lg">
             <Image
-              src="/images/restaurant-interior-new.jpg"
+              src={s.about_image || "/images/restaurant-interior-new.jpg"}
               alt="İç Mekan Görünümü: Damla Kebap Restoranının modern ve şık atmosferi"
               width={600}
               height={400}
@@ -422,6 +444,15 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Gallery - Lazy Loaded */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <GallerySection
+          items={galleryItems}
+          title={s.gallery_title || undefined}
+          subtitle={s.gallery_subtitle || undefined}
+        />
+      </Suspense>
+
       {/* Why Choose Us - Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
         <WhyChooseUs />
@@ -489,12 +520,12 @@ export default function Home() {
 
       {/* Testimonials - Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
-        <Testimonials />
+        <Testimonials s={s} />
       </Suspense>
 
       {/* Contact Section - Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
-        <ContactSection />
+        <ContactSection s={s} />
       </Suspense>
     </div>
   )

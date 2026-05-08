@@ -5,6 +5,9 @@ import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import CallWidget from "@/components/call-widget"
+import PopupBanner from "@/components/popup-banner"
+import { headers } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -40,11 +43,32 @@ export const metadata = {
     generator: 'v0.app'
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headersList = await headers()
+  const pathname = headersList.get("x-pathname") ?? ""
+  const isAdmin = pathname.startsWith("/admin")
+
+  // Fetch active popups + site settings for public pages only
+  let activePopups: object[] = []
+  let siteSettings: Record<string, string> = {}
+  if (!isAdmin) {
+    const supabase = await createClient()
+    const [{ data: popupData }, { data: settingsData }] = await Promise.all([
+      supabase
+        .from("popups")
+        .select("*")
+        .eq("is_active", true)
+        .or("valid_until.is.null,valid_until.gte." + new Date().toISOString()),
+      supabase.from("site_settings").select("key, value"),
+    ])
+    activePopups = popupData ?? []
+    settingsData?.forEach(({ key, value }) => { siteSettings[key] = value ?? "" })
+  }
+
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
@@ -55,12 +79,21 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <Header />
-          <main className="min-h-screen pt-20">{children}</main>
-          <Footer />
-        </ThemeProvider>
-        <CallWidget />
+        {isAdmin ? (
+          // Admin pages: no header, footer or call widget
+          children
+        ) : (
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+            <Header />
+            <main className="min-h-screen pt-20">{children}</main>
+            <Footer s={siteSettings} />
+          </ThemeProvider>
+        )}
+        {!isAdmin && <CallWidget />}
+        {!isAdmin && activePopups.length > 0 && (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <PopupBanner popups={activePopups as any} />
+        )}
       </body>
     </html>
   )
