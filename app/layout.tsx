@@ -52,16 +52,21 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") ?? ""
   const isAdmin = pathname.startsWith("/admin")
 
-  // Fetch active popups for public pages only
+  // Fetch active popups + site settings for public pages only
   let activePopups: object[] = []
+  let siteSettings: Record<string, string> = {}
   if (!isAdmin) {
     const supabase = await createClient()
-    const { data } = await supabase
-      .from("popups")
-      .select("*")
-      .eq("is_active", true)
-      .or("valid_until.is.null,valid_until.gte." + new Date().toISOString())
-    activePopups = data ?? []
+    const [{ data: popupData }, { data: settingsData }] = await Promise.all([
+      supabase
+        .from("popups")
+        .select("*")
+        .eq("is_active", true)
+        .or("valid_until.is.null,valid_until.gte." + new Date().toISOString()),
+      supabase.from("site_settings").select("key, value"),
+    ])
+    activePopups = popupData ?? []
+    settingsData?.forEach(({ key, value }) => { siteSettings[key] = value ?? "" })
   }
 
   return (
@@ -81,7 +86,7 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             <Header />
             <main className="min-h-screen pt-20">{children}</main>
-            <Footer />
+            <Footer s={siteSettings} />
           </ThemeProvider>
         )}
         {!isAdmin && <CallWidget />}

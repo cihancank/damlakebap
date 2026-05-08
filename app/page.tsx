@@ -520,12 +520,12 @@ export default async function Home() {
 
       {/* Testimonials - Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
-        <Testimonials />
+        <Testimonials s={s} />
       </Suspense>
 
       {/* Contact Section - Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
-        <ContactSection />
+        <ContactSection s={s} />
       </Suspense>
     </div>
   )
