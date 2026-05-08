@@ -229,29 +229,6 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
           Yeni Ürün
         </Button>
       </div>
-          <div className="relative">
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="h-9 appearance-none rounded-md border border-zinc-700 bg-zinc-800 pl-3 pr-8 text-sm text-white focus:border-primary focus:outline-none"
-            >
-              <option value="all">Tüm Kategoriler</option>
-              {CATEGORIES.map((c) => (
-                <option key={c.value} value={c.value}>{c.label}</option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-          </div>
-        </div>
-        <Button
-          onClick={openNew}
-          className="flex-shrink-0 bg-primary text-white hover:bg-primary/90"
-          size="sm"
-        >
-          <Plus className="mr-1.5 h-4 w-4" />
-          Yeni Ürün
-        </Button>
-      </div>
 
       {/* Item list grouped by category */}
       {grouped.length === 0 ? (
