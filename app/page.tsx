@@ -8,6 +8,7 @@ import { Suspense, lazy } from "react"
 const WhyChooseUs = lazy(() => import("@/components/why-choose-us"))
 const Testimonials = lazy(() => import("@/components/testimonials"))
 const ContactSection = lazy(() => import("@/components/contact-section"))
+const GallerySection = lazy(() => import("@/components/gallery-section"))
 
 // Loading component for lazy loaded sections
 function SectionSkeleton() {
@@ -421,6 +422,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Gallery - Lazy Loaded */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <GallerySection />
+      </Suspense>
 
       {/* Why Choose Us - Lazy Loaded */}
       <Suspense fallback={<SectionSkeleton />}>
