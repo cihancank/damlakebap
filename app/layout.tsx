@@ -5,7 +5,9 @@ import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import CallWidget from "@/components/call-widget"
+import PopupBanner from "@/components/popup-banner"
 import { headers } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -50,6 +52,18 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") ?? ""
   const isAdmin = pathname.startsWith("/admin")
 
+  // Fetch active popups for public pages only
+  let activePopups: object[] = []
+  if (!isAdmin) {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from("popups")
+      .select("*")
+      .eq("is_active", true)
+      .or("valid_until.is.null,valid_until.gte." + new Date().toISOString())
+    activePopups = data ?? []
+  }
+
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
@@ -71,6 +85,10 @@ export default async function RootLayout({
           </ThemeProvider>
         )}
         {!isAdmin && <CallWidget />}
+        {!isAdmin && activePopups.length > 0 && (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <PopupBanner popups={activePopups as any} />
+        )}
       </body>
     </html>
   )

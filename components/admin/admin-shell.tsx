@@ -11,13 +11,14 @@ import {
   LogOut,
   ExternalLink,
   ChevronRight,
+  Megaphone,
 } from "lucide-react"
-import type { ReactNode } from "react"
 
 const navItems = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard, exact: true },
   { href: "/admin/menu", label: "Menü", icon: UtensilsCrossed },
   { href: "/admin/gallery", label: "Galeri", icon: Images },
+  { href: "/admin/popups", label: "Popuplar", icon: Megaphone },
   { href: "/admin/settings", label: "Ayarlar", icon: Settings },
 ]
 
@@ -78,7 +79,13 @@ export default function AdminShell({
                 }`}
               >
                 <item.icon className="h-4 w-4 flex-shrink-0" />
-                <span className="flex-1">{item.label === "Panel" ? "Dashboard" : item.label === "Ayarlar" ? "Site Ayarları" : item.label === "Menü" ? "Menü Yönetimi" : item.label}</span>
+                <span className="flex-1">{
+                  item.label === "Panel" ? "Dashboard"
+                  : item.label === "Ayarlar" ? "Site Ayarları"
+                  : item.label === "Menü" ? "Menü Yönetimi"
+                  : item.label === "Popuplar" ? "Popup Yönetimi"
+                  : item.label
+                }</span>
                 {active && <ChevronRight className="h-3 w-3 opacity-60" />}
               </Link>
             )
