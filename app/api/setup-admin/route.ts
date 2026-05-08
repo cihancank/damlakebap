@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 
-// One-time route to create the admin user via GoTrue admin API.
-// Delete this file after the account is created.
+// One-time route — resets the admin password via GoTrue Admin API.
+// DELETE this file after confirming login works.
 export async function GET() {
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,16 +10,24 @@ export async function GET() {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  const { data, error } = await supabaseAdmin.auth.admin.createUser({
-    email: "cihankara534@gmail.com",
+  // Find the existing user by email
+  const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+  if (listError) return NextResponse.json({ error: listError.message }, { status: 500 })
+
+  const user = users.find((u) => u.email === "cihankara534@gmail.com")
+  if (!user) return NextResponse.json({ error: "User not found in auth.users" }, { status: 404 })
+
+  // Update password using GoTrue's own bcrypt hashing
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
     password: "23B7A439DAMLAKEBAP",
     email_confirm: true,
-    user_metadata: { is_admin: true },
   })
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
-  }
+  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
-  return NextResponse.json({ success: true, userId: data.user?.id })
+  return NextResponse.json({
+    success: true,
+    message: "Password reset via Admin API. You can now log in at /admin/login.",
+    userId: user.id,
+  })
 }
