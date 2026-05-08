@@ -4,85 +4,35 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const galleryItems = [
-  {
-    src: "/images/adana-kebap-featured.jpg",
-    alt: "Adana Kebap – közde pişirilmiş, baharatlı lezzetin zirvesi",
-    label: "Adana Kebap",
-  },
-  {
-    src: "/images/urfa-kebap-featured.jpg",
-    alt: "Urfa Kebap – yumuşak ve aromalı, yöresel tarife sadık",
-    label: "Urfa Kebap",
-  },
-  {
-    src: "/images/kebaptan-iskender.png",
-    alt: "Kebaptan İskender – özel sosuyla enfes bir klasik",
-    label: "İskender Kebap",
-  },
-  {
-    src: "/images/karisik-kebap-new.png",
-    alt: "Karışık Kebap – birden fazla lezzet bir arada",
-    label: "Karışık Kebap",
-  },
-  {
-    src: "/images/kiymali-pide-new.png",
-    alt: "Kıymalı Pide – fırından taze çıkmış altın çıtır pide",
-    label: "Kıymalı Pide",
-  },
-  {
-    src: "/images/kasarli-pide-new.png",
-    alt: "Kaşarlı Pide – eritilmiş kaşar peyniriyle dolu lezzet",
-    label: "Kaşarlı Pide",
-  },
-  {
-    src: "/images/bafra-pide-new.jpg",
-    alt: "Bafra Pide – Karadeniz usulü yumurtalı kıymalı pide",
-    label: "Bafra Pide",
-  },
-  {
-    src: "/images/lahmacun-new.png",
-    alt: "Lahmacun – ince hamur, baharatlı kıyma, taptaze",
-    label: "Lahmacun",
-  },
-  {
-    src: "/images/kasarli-lahmacun-new.png",
-    alt: "Kaşarlı Lahmacun – kaşar peyniriyle zenginleştirilmiş",
-    label: "Kaşarlı Lahmacun",
-  },
-  {
-    src: "/images/fistikli-kebap-new.jpg",
-    alt: "Fıstıklı Kebap – Antep fıstığıyla buluşan kebap lezzeti",
-    label: "Fıstıklı Kebap",
-  },
-  {
-    src: "/images/cevizli-kebap-new.jpg",
-    alt: "Cevizli Kebap – cevizli özel harçla hazırlanmış",
-    label: "Cevizli Kebap",
-  },
-  {
-    src: "/images/iskender-kebap.png",
-    alt: "İskender – tereyağı, domates sosuyla döner lezzeti",
-    label: "İskender",
-  },
-  {
-    src: "/images/sarma-beyti.png",
-    alt: "Sarma Beyti – özel baharat harmanıyla sarılmış kebap",
-    label: "Sarma Beyti",
-  },
-  {
-    src: "/images/kunefe-new.png",
-    alt: "Künefe – fıstıklı, şerbetli geleneksel tatlı",
-    label: "Künefe",
-  },
-  {
-    src: "/images/restaurant-interior-new.jpg",
-    alt: "Damla Kebap iç mekan – modern ve davetkar atmosfer",
-    label: "Restoranımız",
-  },
+type GalleryItem = {
+  src: string
+  alt: string
+  label: string
+}
+
+interface GallerySectionProps {
+  items?: GalleryItem[]
+  title?: string
+  subtitle?: string
+}
+
+const DEFAULT_ITEMS: GalleryItem[] = [
+  { src: "/images/adana-kebap-featured.jpg", alt: "Adana Kebap", label: "Adana Kebap" },
+  { src: "/images/urfa-kebap-featured.jpg", alt: "Urfa Kebap", label: "Urfa Kebap" },
+  { src: "/images/kebaptan-iskender.png", alt: "İskender Kebap", label: "İskender Kebap" },
+  { src: "/images/karisik-kebap-new.png", alt: "Karışık Kebap", label: "Karışık Kebap" },
+  { src: "/images/kiymali-pide-new.png", alt: "Kıymalı Pide", label: "Kıymalı Pide" },
+  { src: "/images/sarma-beyti.png", alt: "Sarma Beyti", label: "Sarma Beyti" },
+  { src: "/images/kunefe-new.png", alt: "Künefe", label: "Künefe" },
 ]
 
-export default function GallerySection() {
+export default function GallerySection({
+  items,
+  title = "Lezzetlerin Dünyasına Hoş Geldiniz",
+  subtitle = "Damla Kebap'ın enfes yemekleri ve sıcak atmosferinden kareler",
+}: GallerySectionProps) {
+  const galleryItems = (items && items.length > 0) ? items : DEFAULT_ITEMS
+
   const [current, setCurrent] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -98,6 +48,11 @@ export default function GallerySection() {
     setCurrent((c) => (c + 1) % total)
   }, [total])
 
+  // Clamp current index when items change
+  useEffect(() => {
+    setCurrent((c) => Math.min(c, total - 1))
+  }, [total])
+
   // Auto-play
   useEffect(() => {
     if (isHovered) return
@@ -107,7 +62,6 @@ export default function GallerySection() {
     }
   }, [isHovered, next])
 
-  // Touch / drag support
   const handleDragStart = (clientX: number) => {
     setIsDragging(true)
     dragStartX.current = clientX
@@ -120,7 +74,6 @@ export default function GallerySection() {
     setIsDragging(false)
   }
 
-  // Visible indices: prev, current, next (for peek effect)
   const getSlide = (offset: number) => (current + offset + total) % total
 
   return (
@@ -135,11 +88,9 @@ export default function GallerySection() {
             Galeri
           </span>
           <h2 className="text-balance text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Lezzetlerin Dünyasına Hoş Geldiniz
+            {title}
           </h2>
-          <p className="mt-2 text-base text-zinc-400">
-            Damla Kebap&apos;ın enfes yemekleri ve sıcak atmosferinden kareler
-          </p>
+          <p className="mt-2 text-base text-zinc-400">{subtitle}</p>
         </div>
 
         {/* Slider */}
@@ -152,7 +103,6 @@ export default function GallerySection() {
           onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
           onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
         >
-          {/* Cards track */}
           <div className="flex items-center justify-center gap-3 md:gap-5">
             {/* Left peek card */}
             <div
@@ -169,6 +119,7 @@ export default function GallerySection() {
                     className="object-cover"
                     sizes="256px"
                     quality={60}
+                    unoptimized={galleryItems[getSlide(-1)].src.startsWith("http")}
                   />
                   <div className="absolute inset-0 bg-zinc-900/40" />
                 </div>
@@ -181,7 +132,7 @@ export default function GallerySection() {
                 <div className="aspect-[16/10] relative">
                   {galleryItems.map((item, idx) => (
                     <div
-                      key={item.src}
+                      key={`${item.src}-${idx}`}
                       className={`absolute inset-0 transition-opacity duration-700 ${
                         idx === current ? "opacity-100" : "opacity-0"
                       }`}
@@ -194,12 +145,11 @@ export default function GallerySection() {
                         sizes="(max-width: 768px) 100vw, 672px"
                         quality={85}
                         priority={idx === 0}
+                        unoptimized={item.src.startsWith("http")}
                       />
                     </div>
                   ))}
-                  {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  {/* Label */}
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <p className="text-lg font-bold text-white drop-shadow-lg md:text-xl">
                       {galleryItems[current].label}
@@ -227,6 +177,7 @@ export default function GallerySection() {
                     className="object-cover"
                     sizes="256px"
                     quality={60}
+                    unoptimized={galleryItems[getSlide(1)].src.startsWith("http")}
                   />
                   <div className="absolute inset-0 bg-zinc-900/40" />
                 </div>
@@ -255,7 +206,7 @@ export default function GallerySection() {
         <div className="mt-6 flex items-center justify-center gap-1.5" role="tablist" aria-label="Galeri sayfaları">
           {galleryItems.map((item, idx) => (
             <button
-              key={item.src}
+              key={`dot-${idx}`}
               role="tab"
               aria-selected={idx === current}
               aria-label={`${item.label} fotoğrafına git`}
