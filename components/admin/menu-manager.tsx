@@ -377,7 +377,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
 
       {/* Add/Edit Modal — bottom sheet on mobile, centered on desktop */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:px-4 sm:py-8">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 sm:items-center sm:px-4 sm:py-8">
           <div className="w-full max-w-2xl overflow-hidden rounded-t-2xl border border-zinc-800 bg-zinc-900 shadow-2xl sm:rounded-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col">
             {/* Modal header */}
             <div className="flex flex-shrink-0 items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
@@ -558,7 +558,7 @@ export default function MenuManager({ initialItems }: { initialItems: MenuItem[]
             </div>
 
             {/* Modal footer */}
-            <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 sm:px-6 sm:py-4">
               {saved && (
                 <span className="flex items-center gap-1.5 text-sm text-emerald-400">
                   <CheckCircle className="h-4 w-4" />

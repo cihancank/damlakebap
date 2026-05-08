@@ -152,7 +152,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
 
       {/* Add Modal — bottom sheet on mobile */}
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:px-4">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 sm:items-center sm:px-4">
           <div className="w-full max-w-md overflow-hidden rounded-t-2xl border border-zinc-800 bg-zinc-900 shadow-2xl sm:rounded-2xl flex flex-col max-h-[90vh]">
             <div className="flex flex-shrink-0 items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
               <h2 className="font-semibold text-white">Fotoğraf Ekle</h2>
@@ -240,7 +240,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
               </div>
             </div>
 
-            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-zinc-800 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 sm:px-6 sm:py-4">
               {added && (
                 <span className="flex items-center gap-1.5 text-sm text-emerald-400">
                   <CheckCircle className="h-4 w-4" />
