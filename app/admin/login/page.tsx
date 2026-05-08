@@ -14,9 +14,22 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [attempts, setAttempts] = useState(0)
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
+
+  const MAX_ATTEMPTS = 5
+  const LOCKOUT_MS = 60_000 // 1 minute
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
+
+    // Client-side lockout check
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000)
+      setError(`Çok fazla deneme. ${remaining} saniye sonra tekrar deneyin.`)
+      return
+    }
+
     setLoading(true)
     setError("")
 
@@ -24,7 +37,15 @@ export default function AdminLoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError("Geçersiz e-posta veya şifre. Lütfen tekrar deneyin.")
+      const newAttempts = attempts + 1
+      setAttempts(newAttempts)
+      if (newAttempts >= MAX_ATTEMPTS) {
+        setLockedUntil(Date.now() + LOCKOUT_MS)
+        setAttempts(0)
+        setError(`${MAX_ATTEMPTS} başarısız deneme. 1 dakika bekleyin.`)
+      } else {
+        setError(`Geçersiz e-posta veya şifre. (${newAttempts}/${MAX_ATTEMPTS} deneme)`)
+      }
       setLoading(false)
     } else {
       router.push("/admin")
@@ -100,7 +121,7 @@ export default function AdminLoginPage() {
             {/* Submit */}
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || (lockedUntil !== null && Date.now() < lockedUntil)}
               className="w-full bg-primary text-white hover:bg-primary/90 disabled:opacity-60"
             >
               {loading ? "Giriş yapılıyor..." : "Giriş Yap"}

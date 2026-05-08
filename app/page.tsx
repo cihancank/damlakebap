@@ -184,7 +184,7 @@ export default async function Home() {
             <div className="md:col-span-2">
               <div className="group relative overflow-hidden rounded-xl shadow-lg">
                 <Image
-                  src="/images/restaurant-interior-new.jpg"
+                  src={s.showcase_interior_image || "/images/restaurant-interior-new.jpg"}
                   alt="Damla Kebap'ın modern ve şık iç mekanı"
                   width={800}
                   height={500}
@@ -205,7 +205,7 @@ export default async function Home() {
             <div className="space-y-4">
               <div className="group relative overflow-hidden rounded-xl shadow-lg">
                 <Image
-                  src="/images/exterior-storefront.jpg"
+                  src={s.showcase_exterior_image || "/images/exterior-storefront.jpg"}
                   alt="Damla Kebap'ın gece görünümü ve dış cephesi"
                   width={400}
                   height={300}
@@ -304,7 +304,7 @@ export default async function Home() {
 
           <div className="overflow-hidden rounded-lg shadow-lg">
             <Image
-              src="/images/restaurant-interior-new.jpg"
+              src={s.about_image || "/images/restaurant-interior-new.jpg"}
               alt="İç Mekan Görünümü: Damla Kebap Restoranının modern ve şık atmosferi"
               width={600}
               height={400}
